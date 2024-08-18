@@ -1,7 +1,7 @@
 import { Button, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 
-const ChooseParams = ({ params, setParams, dataSize }) => {
+const ChooseParams = ({ params, setParams, stopSliding = false }) => {
   const paramsList = {
     N: "Window Size",
     S: "Start Index",
@@ -23,9 +23,10 @@ const ChooseParams = ({ params, setParams, dataSize }) => {
   };
 
   useEffect(() => {
-    if (params.S + Math.max(params.N, params.P) >= dataSize)
+    if (stopSliding) {
       clearInterval(intervalId);
-  }, [params]);
+    }
+  }, [stopSliding, intervalId]);
 
   useEffect(() => {
     return () => clearInterval(intervalId); // Cleanup on unmount
