@@ -9,7 +9,6 @@ const parseAndDownSample = (
   dataLocations,
   threshold = 300
 ) => {
-  let index = 0;
   const sampled = [];
   const errorMargins = { min: [], max: [] };
   const bucketSize = Math.max(1, Math.floor(windowSize / threshold));
@@ -21,6 +20,7 @@ const parseAndDownSample = (
   let sumSq = 0;
   let average = 0;
   let variance = 0;
+  let count = 0;
 
   const saveBucketStats = () => {
     const avgX =
@@ -45,32 +45,29 @@ const parseAndDownSample = (
       stopSliding(false);
     },
     step: (result, parser) => {
-      if (index >= startIndex) {
-        const n = index - startIndex + 1;
-        const row = result.data;
-        const point = {
-          x: parseFloat(row[0]),
-          y: parseFloat(row[1]),
-        };
-        bucket.push(point);
-        min = Math.min(min, point.y);
-        max = Math.max(max, point.y);
-        sum += point.y;
-        sumSq += point.y * point.y;
-        average = sum / n;
-        variance = sumSq / n - average * average;
-        if (bucket.length === bucketSize) {
+      const row = result.data;
+      const point = {
+        x: parseFloat(row[0]),
+        y: parseFloat(row[1]),
+      };
+      bucket.push(point);
+      min = Math.min(min, point.y);
+      max = Math.max(max, point.y);
+      sum += point.y;
+      sumSq += point.y * point.y;
+      average = sum / count;
+      variance = sumSq / count - average * average;
+      if (bucket.length === bucketSize) {
+        saveBucketStats();
+      }
+      if (count === windowSize) {
+        if (bucket.length) {
           saveBucketStats();
         }
-        if (n === windowSize) {
-          if (bucket.length) {
-            saveBucketStats();
-          }
-          onDataParsed({ sampled, errorMargins, min, max, average, variance });
-          parser.pause();
-        }
+        onDataParsed({ sampled, errorMargins, min, max, average, variance });
+        parser.pause();
       }
-      index++;
+      count++;
     },
     complete: () => {
       stopSliding(true);
