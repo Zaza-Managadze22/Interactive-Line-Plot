@@ -30,8 +30,6 @@ const App = () => {
     });
   };
 
-  console.log(numRows, dataLocations);
-
   const onDataParsed = ({
     sampled,
     errorMargins,

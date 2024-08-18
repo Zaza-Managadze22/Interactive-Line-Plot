@@ -46,7 +46,12 @@ const Plot = ({ data, errorMargins }) => {
           display: false,
         },
         scales: {
-          x: { type: "linear", position: "bottom" },
+          x: {
+            type: "linear",
+            position: "bottom",
+            min: data[0].x,
+            max: data[data.length - 1].x,
+          },
           y: { beginAtZero: true },
         },
         animation: {
