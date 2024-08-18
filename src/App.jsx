@@ -49,7 +49,6 @@ const App = () => {
       <ChooseParams
         params={params}
         setParams={setParams}
-        // dataSize={params.N}
         stopSliding={stopSliding}
       />
       {!!data.length && <Plot data={data} errorMargins={errorMargins} />}
