@@ -6,12 +6,14 @@ const parseAndDownSample = (
   windowSize,
   onDataParsed,
   stopSliding,
+  dataLocations,
   threshold = 300
 ) => {
   let index = 0;
   const sampled = [];
   const errorMargins = { min: [], max: [] };
   const bucketSize = Math.max(1, Math.floor(windowSize / threshold));
+  const offset = dataLocations[Math.floor(startIndex / 1000)];
   let bucket = [];
   let min = Infinity;
   let max = -Infinity;
@@ -36,7 +38,9 @@ const parseAndDownSample = (
     bucket = [];
   };
 
-  Papa.parse(file, {
+  console.log(offset);
+
+  Papa.parse(file.slice(offset), {
     beforeFirstChunk: () => {
       stopSliding(false);
     },
@@ -72,6 +76,7 @@ const parseAndDownSample = (
       stopSliding(true);
       if (bucket.length) {
         saveBucketStats();
+        console.log(sampled);
         onDataParsed({ sampled, errorMargins, min, max, average, variance });
       }
     },
