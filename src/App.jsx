@@ -5,9 +5,12 @@ import ChooseParams from "./ChooseParams";
 import FileUpload from "./FileUpload";
 import parseAndDownSample from "./parseAndDownSample";
 import Plot from "./Plot";
+import processFile from "./processFile";
 
 const App = () => {
   const [file, setFile] = useState(null);
+  const [numRows, setNumRows] = useState(0);
+  const [dataLocations, setDataLocations] = useState([]);
   const [data, setData] = useState([]);
   const [errorMargins, setErrorMargins] = useState(null);
   const [stats, setStats] = useState(null);
@@ -18,6 +21,14 @@ const App = () => {
     P: 10, // Default increment
     T: 500, // Default interval in ms
   });
+
+  const onFileUpload = (file) => {
+    setFile(file);
+    processFile(file, (numRows, locations) => {
+      setNumRows(numRows);
+      setDataLocations(locations);
+    });
+  };
 
   const onDataParsed = ({
     sampled,
@@ -33,19 +44,21 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (file)
+    if (file) {
       parseAndDownSample(
         file,
         params.S,
         params.N,
         onDataParsed,
-        setStopSliding
+        setStopSliding,
+        dataLocations
       );
+    }
   }, [file, params.S, params.N]);
 
   return (
     <div>
-      <FileUpload onUpload={setFile} />
+      <FileUpload onUpload={onFileUpload} />
       <ChooseParams
         params={params}
         setParams={setParams}
