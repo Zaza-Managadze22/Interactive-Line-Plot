@@ -87,8 +87,7 @@ const parseAndDownSample = async (
   baskets,
   startIndex,
   linesCount,
-  onDataParsed,
-  stopSliding
+  onDataParsed
 ) => {
   // console.log("started", startIndex, linesCount);
   const basketsStats = [];
@@ -118,8 +117,6 @@ const parseAndDownSample = async (
 
   // TODO: get min id of baskets and then delete unused baskets to avoid memory leak
 
-  stopSliding(true);
-
   const windowStats = calculateTotalStats(basketsStats);
 
   // console.log(basketsStats.map((e) => ({ x: e.avgX, y: e.avgY })));
@@ -139,8 +136,6 @@ const parseAndDownSample = async (
     average: windowStats.average,
     variance: windowStats.variance,
   });
-
-  stopSliding(false);
 
   // console.log("finished", startIndex, linesCount);
 };

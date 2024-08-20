@@ -21,21 +21,25 @@ const App = () => {
     T: 500, // Default interval in ms
   });
 
+  const basketSize = Math.max(1, Math.floor(params.N / MAX_POINTS_ON_CHART));
+
+  const baskets = useMemo(() => new Baskets(basketSize), [basketSize]);
+
   const processor = useMemo(() => {
     if (!file) return null;
     window.sFile = file;
-    const leftProcessor = new ProcessFile(file);
-    const rightProcessor = new ProcessFile(file, () => {
-      setStopSliding(true);
-    });
+    const leftProcessor = new ProcessFile(file, undefined, basketSize);
+    const rightProcessor = new ProcessFile(
+      file,
+      () => {
+        setStopSliding(true);
+      },
+      basketSize
+    );
     window.leftProcessor = leftProcessor;
     window.rightProcessor = rightProcessor;
     return { left: leftProcessor, right: rightProcessor };
   }, [file]);
-
-  const basketSize = Math.max(1, Math.floor(params.N / MAX_POINTS_ON_CHART));
-
-  const baskets = useMemo(() => new Baskets(basketSize), [basketSize]);
 
   const onDataParsed = ({
     sampled,
