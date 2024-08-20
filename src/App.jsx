@@ -6,15 +6,17 @@ import FileUpload from "./FileUpload";
 import parseAndDownSample from "./parseAndDownSample";
 import Plot from "./Plot";
 import processFile from "./processFile";
+import CircularProgressWithLabel from "./CircularProgressWithLabel";
 
 const App = () => {
   const [file, setFile] = useState(null);
-  const [numRows, setNumRows] = useState(0);
   const [dataLocations, setDataLocations] = useState([]);
   const [data, setData] = useState([]);
   const [errorMargins, setErrorMargins] = useState(null);
   const [stats, setStats] = useState(null);
   const [stopSliding, setStopSliding] = useState(false);
+  const [isFileBeingParsed, setIsFileBeingParsed] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [params, setParams] = useState({
     N: 100, // Default window size
     S: 0, // Default start index
@@ -23,10 +25,11 @@ const App = () => {
   });
 
   const onFileUpload = (file) => {
+    setIsFileBeingParsed(true);
     setFile(file);
-    processFile(file, (numRows, locations) => {
-      setNumRows(numRows);
+    processFile(file, setUploadProgress, (locations) => {
       setDataLocations(locations);
+      setIsFileBeingParsed(false);
     });
   };
 
@@ -44,7 +47,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (file) {
+    if (file && !isFileBeingParsed) {
       parseAndDownSample(
         file,
         params.S,
@@ -54,9 +57,11 @@ const App = () => {
         dataLocations
       );
     }
-  }, [file, params.S, params.N]);
+  }, [file, params.S, params.N, isFileBeingParsed, dataLocations]);
 
-  return (
+  return isFileBeingParsed ? (
+    <CircularProgressWithLabel value={uploadProgress} />
+  ) : (
     <div>
       <FileUpload onUpload={onFileUpload} />
       <ChooseParams
