@@ -131,8 +131,8 @@ const parseAndDownSample = async (
     })),
     sampled: basketsStats.map((e) => ({ x: e.avgX, y: e.avgY })),
     errorMargins: {
-      min: basketsStats.map((e) => e.yMin),
-      max: basketsStats.map((e) => e.yMax),
+      min: basketsStats.map((e) => ({ x: e.avgX, y: e.yMin })),
+      max: basketsStats.map((e) => ({ x: e.avgX, y: e.yMax })),
     },
     min: windowStats.min,
     max: windowStats.max,
