@@ -172,13 +172,11 @@ const getNewLines = async (processor, baskets, basketRanges) => {
       .then((lines) => pushFromIndex(readLines, firstLinesIndices[0], lines));
   }
 
-  await Promise.all(
-    linesToFetch.map(([start, end]) =>
-      processor.right
-        .readLines(start, end)
-        .then((lines) => pushFromIndex(readLines, start, lines))
-    )
-  );
+  for (const [start, end] of linesToFetch) {
+    await processor.right
+      .readLines(start, end)
+      .then((lines) => pushFromIndex(readLines, start, lines));
+  }
 
   return readLines;
 };
