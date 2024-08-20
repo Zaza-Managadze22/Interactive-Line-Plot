@@ -1,70 +1,79 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Aggregates from "./Aggregates";
 import "./App.css";
 import ChooseParams from "./ChooseParams";
 import FileUpload from "./FileUpload";
-import parseAndDownSample from "./parseAndDownSample";
+import parseAndDownSample, { Baskets } from "./parseAndDownSample";
 import Plot from "./Plot";
-import processFile from "./processFile";
+import ProcessFile from "./processFile";
+
+const MAX_POINTS_ON_CHART = 300;
 
 const App = () => {
   const [file, setFile] = useState(null);
-  const [numRows, setNumRows] = useState(0);
-  const [dataLocations, setDataLocations] = useState([]);
-  const [data, setData] = useState([]);
-  const [errorMargins, setErrorMargins] = useState(null);
+  const [chartResults, setChartResults] = useState(null);
   const [stats, setStats] = useState(null);
   const [stopSliding, setStopSliding] = useState(false);
   const [params, setParams] = useState({
-    N: 100, // Default window size
+    N: 10, // Default window size
     S: 0, // Default start index
     P: 10, // Default increment
     T: 500, // Default interval in ms
   });
 
-  const onFileUpload = (file) => {
-    setFile(file);
-    processFile(file, (numRows, locations) => {
-      setNumRows(numRows);
-      setDataLocations(locations);
+  const processor = useMemo(() => {
+    if (!file) return null;
+    window.sFile = file;
+    const leftProcessor = new ProcessFile(file);
+    const rightProcessor = new ProcessFile(file, () => {
+      setStopSliding(true);
     });
-  };
+    window.leftProcessor = leftProcessor;
+    window.rightProcessor = rightProcessor;
+    return { left: leftProcessor, right: rightProcessor };
+  }, [file]);
+
+  const basketSize = Math.max(1, Math.floor(params.N / MAX_POINTS_ON_CHART));
+
+  const baskets = useMemo(() => new Baskets(basketSize), [basketSize]);
 
   const onDataParsed = ({
     sampled,
     errorMargins,
+    basketIds,
     min,
     max,
     average,
     variance,
   }) => {
-    setData(sampled);
-    setErrorMargins(errorMargins);
+    setChartResults({ data: sampled, errorMargins, basketIds });
     setStats({ min, max, average, variance });
   };
 
   useEffect(() => {
     if (file) {
       parseAndDownSample(
-        file,
+        processor,
+        baskets,
         params.S,
         params.N,
         onDataParsed,
-        setStopSliding,
-        dataLocations
+        setStopSliding
       );
     }
-  }, [file, params.S, params.N]);
+  }, [processor, baskets, params.S, params.N]);
 
   return (
     <div>
-      <FileUpload onUpload={onFileUpload} />
+      <FileUpload onUpload={setFile} />
       <ChooseParams
         params={params}
         setParams={setParams}
         stopSliding={stopSliding}
       />
-      {!!data.length && <Plot data={data} errorMargins={errorMargins} />}
+      {!!chartResults && !!chartResults.data.length && (
+        <Plot N={params.N} {...chartResults} />
+      )}
       {!!stats && <Aggregates stats={stats} />}
     </div>
   );
