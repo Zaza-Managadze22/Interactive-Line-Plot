@@ -1,5 +1,5 @@
-import React from "react";
-import FileInput from "./FileInput";
+import { Button } from "@mui/material";
+import React, { useRef } from "react";
 
 const FileUpload = ({ onUpload }) => {
   const handleFileUpload = (event) => {
@@ -7,7 +7,21 @@ const FileUpload = ({ onUpload }) => {
     onUpload(file);
   };
 
-  return <FileInput handleFileUpload={handleFileUpload} />;
+  const inputRef = useRef(null);
+
+  function handleButtonClick(e) {
+    e.preventDefault();
+    if (!inputRef || !inputRef.current) return;
+
+    inputRef.current.click();
+  }
+
+  return (
+    <>
+      <Button onClick={handleButtonClick}>Upload File</Button>
+      <input ref={inputRef} type="file" hidden onChange={handleFileUpload} />
+    </>
+  );
 };
 
 export default FileUpload;

@@ -1,12 +1,22 @@
 import { Button, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 
-const ChooseParams = ({ params, setParams, stopSliding = false }) => {
+const ChooseParams = ({ params, setParams, numRows }) => {
+  // List of parameter labels
   const paramsList = {
     N: "Window Size",
     S: "Start Index",
     P: "Increment",
     T: "Interval",
+  };
+
+  // Handle parameter change
+  const onParamChange = (key, value) => {
+    if (value >= 0 && value <= numRows)
+      setParams((params) => ({
+        ...params,
+        [key]: value,
+      }));
   };
 
   const [intervalId, setIntervalId] = useState(null);
@@ -22,11 +32,10 @@ const ChooseParams = ({ params, setParams, stopSliding = false }) => {
     setIntervalId(id);
   };
 
+  // Stop sliding when we reach the end of file
   useEffect(() => {
-    if (stopSliding) {
-      clearInterval(intervalId);
-    }
-  }, [stopSliding, intervalId]);
+    if (params.S + params.P >= numRows - 1) clearInterval(intervalId);
+  }, [intervalId, params]);
 
   useEffect(() => {
     return () => clearInterval(intervalId); // Cleanup on unmount
@@ -42,12 +51,7 @@ const ChooseParams = ({ params, setParams, stopSliding = false }) => {
             type="number"
             name={key}
             value={params[key]}
-            onChange={(e) =>
-              setParams((params) => ({
-                ...params,
-                [key]: parseInt(e.target.value),
-              }))
-            }
+            onChange={(e) => onParamChange(key, parseInt(e.target.value))}
           />
           <br />
         </div>

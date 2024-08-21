@@ -1,11 +1,20 @@
 import Papa from "papaparse";
 
+/**
+ * Parses and downsamples a file, calculating running statistics.
+ * @param {File} file - The file to parse.
+ * @param {number} startIndex - The starting index for parsing.
+ * @param {number} windowSize - The size of the window for downsampling.
+ * @param {function} onDataParsed - Callback function to handle parsed data.
+ * @param {Array} dataLocations - Array of data locations for chunking.
+ * @param {number} [threshold=300] - The threshold for downsampling.
+ */
+
 const parseAndDownSample = (
   file,
   startIndex,
   windowSize,
   onDataParsed,
-  stopSliding,
   dataLocations,
   threshold = 300
 ) => {
@@ -23,6 +32,9 @@ const parseAndDownSample = (
   let average = 0;
   let variance = 0;
 
+  /**
+   * Saves the statistics of the current bucket.
+   */
   const saveBucketStats = () => {
     const avgX =
       bucket.reduce((sum, point) => sum + point.x, 0) / bucket.length;
@@ -40,9 +52,6 @@ const parseAndDownSample = (
   };
 
   Papa.parse(file.slice(offset), {
-    beforeFirstChunk: () => {
-      stopSliding(false);
-    },
     step: (result, parser) => {
       if (index >= startIndex) {
         const n = index - startIndex + 1;
@@ -72,7 +81,6 @@ const parseAndDownSample = (
       index++;
     },
     complete: () => {
-      stopSliding(true);
       if (bucket.length) {
         saveBucketStats();
         onDataParsed({ sampled, errorMargins, min, max, average, variance });

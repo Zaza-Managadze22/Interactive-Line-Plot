@@ -1,5 +1,12 @@
 import Papa from "papaparse";
 
+/**
+ * Processes a file to count rows and track byte locations for chunking.
+ * @param {File} file - The file to process.
+ * @param {function} onProgress - Callback function to report progress.
+ * @param {function} onComplete - Callback function to handle completion.
+ */
+
 const processFile = (file, onProgress, onComplete) => {
   let numRows = 0;
   const locations = [0];
@@ -18,7 +25,7 @@ const processFile = (file, onProgress, onComplete) => {
       onProgress(progress);
     },
     complete: () => {
-      onComplete(locations);
+      onComplete(numRows, locations);
     },
     skipEmptyLines: true,
   });
