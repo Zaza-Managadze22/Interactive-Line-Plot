@@ -22,6 +22,7 @@ This app allows users to upload a CSV file and visualize the data as a line plot
    ```bash
    npm install
    ```
+3. Main branch is the default branch and contains the last stable release
 
 ## Usage
 
