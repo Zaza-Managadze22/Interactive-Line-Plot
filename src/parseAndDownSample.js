@@ -115,8 +115,6 @@ const parseAndDownSample = async (
     }
   }
 
-  // TODO: get min id of baskets and then delete unused baskets to avoid memory leak
-
   const windowStats = calculateTotalStats(basketsStats);
 
   // console.log(basketsStats.map((e) => ({ x: e.avgX, y: e.avgY })));
