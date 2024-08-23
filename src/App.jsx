@@ -28,14 +28,10 @@ const App = () => {
   const processor = useMemo(() => {
     if (!file) return null;
     window.sFile = file;
-    const leftProcessor = new ProcessFile(file, undefined, basketSize);
-    const rightProcessor = new ProcessFile(
-      file,
-      () => {
-        setStopSliding(true);
-      },
-      basketSize
-    );
+    const leftProcessor = new ProcessFile(file);
+    const rightProcessor = new ProcessFile(file, () => {
+      setStopSliding(true);
+    });
     window.leftProcessor = leftProcessor;
     window.rightProcessor = rightProcessor;
     return { left: leftProcessor, right: rightProcessor };
