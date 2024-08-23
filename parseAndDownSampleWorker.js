@@ -10,14 +10,16 @@ import Papa from "papaparse";
  * @param {number} [threshold=300] - The threshold for downsampling.
  */
 
-const parseAndDownSample = (
-  file,
-  startIndex,
-  windowSize,
-  onDataParsed,
-  dataLocations,
-  threshold = 300
-) => {
+onmessage = ({
+  data: {
+    file,
+    startIndex,
+    windowSize,
+    // onDataParsed,
+    dataLocations,
+    threshold = 300,
+  },
+}) => {
   const sampled = [];
   const errorMargins = { min: [], max: [] };
   const bucketSize = Math.max(1, Math.floor(windowSize / threshold));
@@ -74,8 +76,8 @@ const parseAndDownSample = (
           if (bucket.length) {
             saveBucketStats();
           }
-          onDataParsed({ sampled, errorMargins, min, max, average, variance });
           parser.pause();
+          postMessage({ sampled, errorMargins, min, max, average, variance });
         }
       }
       index++;
@@ -83,11 +85,9 @@ const parseAndDownSample = (
     complete: () => {
       if (bucket.length) {
         saveBucketStats();
-        onDataParsed({ sampled, errorMargins, min, max, average, variance });
+        postMessage({ sampled, errorMargins, min, max, average, variance });
       }
     },
     skipEmptyLines: true,
   });
 };
-
-export default parseAndDownSample;

@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import Aggregates from "./Aggregates";
 import "./App.css";
 import ChooseParams from "./ChooseParams";
+import CircularProgressWithLabel from "./CircularProgressWithLabel";
 import FileUpload from "./FileUpload";
-import parseAndDownSample from "./parseAndDownSample";
 import Plot from "./Plot";
 import processFile from "./processFile";
-import CircularProgressWithLabel from "./CircularProgressWithLabel";
 
 const App = () => {
   const [file, setFile] = useState(null);
@@ -23,6 +22,7 @@ const App = () => {
     P: 10, // Default increment
     T: 500, // Default interval in ms
   });
+  const [worker, setWorker] = useState(null);
 
   const onFileUpload = (file) => {
     setIsFileBeingParsed(true);
@@ -33,6 +33,26 @@ const App = () => {
       setIsFileBeingParsed(false);
     });
   };
+
+  useEffect(() => {
+    // Create a new web worker
+    const myWorker = new Worker("parseAndDownSampleWorker.js", {
+      type: "module",
+    });
+
+    // Set up event listener for messages from the worker
+    myWorker.onmessage = function (event) {
+      onDataParsed(event.data);
+    };
+
+    // Save the worker instance to state
+    setWorker(myWorker);
+
+    // Clean up the worker when the component unmounts
+    return () => {
+      myWorker.terminate();
+    };
+  }, []);
 
   // Callback for when data is parsed from the file and downsampled
   const onDataParsed = ({
@@ -50,10 +70,16 @@ const App = () => {
 
   // Effect to parse and downsample data when file or parameters change
   useEffect(() => {
-    if (file && !isFileBeingParsed) {
-      parseAndDownSample(file, params.S, params.N, onDataParsed, dataLocations);
+    if (worker && file && !isFileBeingParsed) {
+      worker.postMessage({
+        file,
+        startIndex: params.S,
+        windowSize: params.N,
+        // onDataParsed,
+        dataLocations,
+      });
     }
-  }, [file, params.S, params.N, isFileBeingParsed, dataLocations]);
+  }, [file, params.S, params.N, isFileBeingParsed, dataLocations, worker]);
 
   return isFileBeingParsed ? (
     <CircularProgressWithLabel value={uploadProgress} />
