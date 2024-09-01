@@ -5,20 +5,12 @@ import Papa from "papaparse";
  * @param {File} file - The file to parse.
  * @param {number} startIndex - The starting index for parsing.
  * @param {number} windowSize - The size of the window for downsampling.
- * @param {function} onDataParsed - Callback function to handle parsed data.
  * @param {Array} dataLocations - Array of data locations for chunking.
  * @param {number} [threshold=300] - The threshold for downsampling.
  */
 
 onmessage = ({
-  data: {
-    file,
-    startIndex,
-    windowSize,
-    // onDataParsed,
-    dataLocations,
-    threshold = 300,
-  },
+  data: { file, startIndex, windowSize, dataLocations, threshold = 300 },
 }) => {
   const sampled = [];
   const errorMargins = { min: [], max: [] };

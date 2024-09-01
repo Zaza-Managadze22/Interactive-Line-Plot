@@ -75,7 +75,6 @@ const App = () => {
         file,
         startIndex: params.S,
         windowSize: params.N,
-        // onDataParsed,
         dataLocations,
       });
     }
